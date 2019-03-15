@@ -28,7 +28,7 @@ int main(){
 	readInput(graph);
 
 	int numberSCCs = findSCC(graph);
-	printf("Numero: %d\n", numberSCCs);
+	printf("%d\n", numberSCCs);
 
 
 
