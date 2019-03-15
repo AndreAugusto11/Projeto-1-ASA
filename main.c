@@ -8,7 +8,7 @@ void readInput(Graph *graph);
 int findSCC(Graph *graph);
 void readInput(Graph *graph);
 int findSCC(Graph *graph);
-void TarjanAdapt(Node *node, Node *nodesList, Stack *s);
+void TarjanAdapt(Node *node, Node *nodesList);
 int min(int n1, int n2);
 
 
@@ -60,21 +60,19 @@ int findSCC(Graph *graph){
 
 	Node *nodesList = graph->nodesList;
 
-	Stack *s = allocStack(graph->numberRouters);
 
 	for (i = 1; i <= graph->numberRouters; i++){
 		if (nodesList[i].discovered == -1){
-			TarjanAdapt(&nodesList[i], nodesList, s);
+			TarjanAdapt(&nodesList[i], nodesList);
 				numberSCCs++;
 		}
 	}
 
-	freeStack(s);
 	return numberSCCs;
 }
 
 
-void TarjanAdapt(Node *node, Node *nodesList, Stack *s){
+void TarjanAdapt(Node *node, Node *nodesList){
 	
 	static int time = 1;
 
@@ -84,7 +82,7 @@ void TarjanAdapt(Node *node, Node *nodesList, Stack *s){
 
 	while(iter != NULL){
 		if (nodesList[iter->id].discovered == -1)
-			TarjanAdapt(&nodesList[iter->id], nodesList, s);
+			TarjanAdapt(&nodesList[iter->id], nodesList);
 
 			node->low = min(nodesList[iter->id].low, node->low);
 		
