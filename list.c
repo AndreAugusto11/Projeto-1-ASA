@@ -8,7 +8,7 @@ Node* allocList(int size){
 	/* Ignoring the list's first position */
 	Node *nodesList = (Node *)malloc(sizeof(struct node)*(size + 1));
 
-	for (i = 0; i < size; i++){
+	for (i = 1; i <= size; i++){
 		nodesList[i].id = i;
 		nodesList[i].discovered = -1;
 		nodesList[i].low = -1;
@@ -35,9 +35,9 @@ void printList(Graph *graph){
 	Neighbour *iter;
 	Node *nodesList = graph->nodesList;
 
-	for (i = 0; i < graph->numberRouters; i++){
+	for (i = 1; i <= graph->numberRouters; i++){
 		iter = nodesList[i].first;
-		printf("%d: ", i);
+		printf("%d(%d, %d): ", i, nodesList[i].discovered, nodesList[i].low);
 
 		if (iter == NULL){
 			printf("\n");

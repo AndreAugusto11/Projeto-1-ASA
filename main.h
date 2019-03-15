@@ -20,3 +20,4 @@ typedef struct graph {
 	int numberConnections;
 	Node *nodesList;
 } Graph;
+
