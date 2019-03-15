@@ -30,9 +30,6 @@ int main(){
 	int numberSCCs = findSCC(graph);
 	printf("Numero: %d\n", numberSCCs);
 
-	printf("Printing:\n");
-	printList(graph);
-
 
 
 	freeList(graph);
@@ -83,27 +80,15 @@ void TarjanAdapt(Node *node, Node *nodesList, Stack *s){
 
 	node->discovered = time++;
 	node->low = node->discovered;
-	node->onStack = true;
 	Neighbour *iter = node->first;
-
 
 	while(iter != NULL){
 		if (nodesList[iter->id].discovered == -1)
 			TarjanAdapt(&nodesList[iter->id], nodesList, s);
 
-		else if (nodesList[iter->id].onStack == true)
 			node->low = min(nodesList[iter->id].low, node->low);
 		
 		iter = iter->next;
-	}
-
-	if (node->discovered == node->low){
-		Node *nodeAux = &nodesList[pop(s)];
-		
-		while(nodeAux->id != node->id){
-			nodeAux->onStack = false;
-			nodeAux = &nodesList[pop(s)];
-		}
 	}
 }
 
