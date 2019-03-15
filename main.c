@@ -86,7 +86,6 @@ void TarjanAdapt(Node *node, Node *nodesList, Stack *s){
 	node->onStack = true;
 	Neighbour *iter = node->first;
 
-	push(node->id, s);
 
 	while(iter != NULL){
 		if (nodesList[iter->id].discovered == -1)
