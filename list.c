@@ -6,7 +6,7 @@ Node* allocList(int size){
 
 	int i;
 	/* Ignoring the list's first position */
-	Node *nodesList = (Node *)malloc(sizeof(struct node)*(size + 1));
+	Node *nodesList = calloc((size + 1), sizeof(struct node));
 
 	for (i = 1; i <= size; i++){
 		nodesList[i].id = i;
@@ -62,7 +62,7 @@ void freeList(Graph *graph){
 	Neighbour *iter1, *iter2;
 	Node *nodesList = graph->nodesList;
 
-	for (i = 0; i < graph->numberRouters; i++){
+	for (i = 0; i <= graph->numberRouters; i++){
 		iter1 = nodesList[i].first;
 		
 		if (iter1 == NULL)

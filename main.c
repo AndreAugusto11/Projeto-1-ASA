@@ -5,14 +5,17 @@
 #include "stack.c"
 
 void readInput(Graph *graph);
-int findSCC(Graph *graph);
 void readInput(Graph *graph);
-int findSCC(Graph *graph);
-void TarjanAdapt(Node *node, Node *nodesList);
+int* findSCC(Graph *graph, int* outputArray);
+int TarjanAdapt(Node *node, Node *nodesList);
 int min(int n1, int n2);
 
+/* Size of output array in findScc */
+int SIZE = 25;
 
 int main(){
+
+	int i = 1;
 
 	Graph *graph = (Graph *)malloc(sizeof(struct graph));
 
@@ -27,10 +30,19 @@ int main(){
 	/* Read the input values */
 	readInput(graph);
 
-	int numberSCCs = findSCC(graph);
-	printf("%d\n", numberSCCs);
+	/* outputArray to store in the first position the number of SCCs and the subgraphs' id (The highest id in each subgraph) */
+	int *outputArray = calloc(SIZE, sizeof(int));
 
+	outputArray = findSCC(graph, outputArray);
 
+	printf("%d\n", outputArray[0]);
+
+	while (outputArray[i] != 0)
+		printf("%d ", outputArray[i++]);
+
+	printf("\n");
+
+	free(outputArray);
 
 	freeList(graph);
 	free(graph);
@@ -53,32 +65,42 @@ void readInput(Graph *graph){
 }
 
 
-int findSCC(Graph *graph){
+int* findSCC(Graph *graph, int *outputArray){
 	
-	int i = 0;
+	int i = 0, j = 1;
 	int numberSCCs = 0;
 
 	Node *nodesList = graph->nodesList;
 
-
 	for (i = 1; i <= graph->numberRouters; i++){
 		if (nodesList[i].discovered == -1){
-			TarjanAdapt(&nodesList[i], nodesList);
-				numberSCCs++;
+			outputArray[j++] = TarjanAdapt(&nodesList[i], nodesList);
+			numberSCCs++;
+			
+			if (j == SIZE - 1){
+				SIZE *= 2;
+				outputArray = realloc(outputArray, SIZE);
+			}
 		}
 	}
 
-	return numberSCCs;
+	outputArray[0] = numberSCCs;
+
+	return outputArray;
 }
 
 
-void TarjanAdapt(Node *node, Node *nodesList){
+int TarjanAdapt(Node *node, Node *nodesList){
 	
 	static int time = 1;
+	static int sccId = 0;
 
 	node->discovered = time++;
 	node->low = node->discovered;
 	Neighbour *iter = node->first;
+
+	if (sccId < node->id)
+		sccId = node->id;
 
 	while(iter != NULL){
 		if (nodesList[iter->id].discovered == -1)
@@ -88,6 +110,11 @@ void TarjanAdapt(Node *node, Node *nodesList){
 		
 		iter = iter->next;
 	}
+
+	if (node->id == nodesList[node->id].low)
+		return sccId;
+
+	return 0;
 }
 
 
