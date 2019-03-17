@@ -9,9 +9,13 @@ void readInput(Graph *graph);
 int* findSCC(Graph *graph, int* outputArray);
 int TarjanAdapt(Node *node, Node *nodesList);
 int min(int n1, int n2);
+int countArticulationPoints(Graph *graph);
+int iterateOverGraph(Node *node, Node *nodesList, int *visited);
+
 
 /* Size of output array in findScc */
 int SIZE = 25;
+int rootTreeEdges = 0;
 
 int main(){
 
@@ -41,6 +45,8 @@ int main(){
 		printf("%d ", outputArray[i++]);
 
 	printf("\n");
+
+	printf("%d\n", countArticulationPoints(graph));
 
 	free(outputArray);
 
@@ -106,17 +112,76 @@ int TarjanAdapt(Node *node, Node *nodesList){
 		if (nodesList[iter->id].discovered == -1)
 			TarjanAdapt(&nodesList[iter->id], nodesList);
 
-			node->low = min(nodesList[iter->id].low, node->low);
+		node->low = min(nodesList[iter->id].low, node->low);
 		
 		iter = iter->next;
 	}
 
-	if (node->id == nodesList[node->id].low)
+	if (node->discovered == nodesList[node->id].low)
 		return sccId;
+
 
 	return 0;
 }
 
+int countArticulationPoints(Graph *graph){
+
+	Node *nodesList = graph->nodesList;
+	int i = 0, totalArtPoints = 0, aux = 0;
+
+	int *visited = calloc((graph->numberRouters + 1), sizeof(int));
+
+	for (i = 1; i <= graph->numberRouters; i++){
+		if (visited[nodesList[i].id] == 0){
+			totalArtPoints = iterateOverGraph(&nodesList[i], nodesList, visited);
+			rootTreeEdges = 0;
+		}
+	}
+
+	free(visited);
+	return totalArtPoints;
+}
+
+int iterateOverGraph(Node *node, Node *nodesList, int *visited){
+
+	static int numArticulationPoints = 0;			/* If the root has at least two tree edges then it is an articulation point */
+	int i = 0;
+
+	visited[node->id] = 1;
+	Neighbour *iter = node->first;
+
+	while(iter != NULL){
+		if (visited[iter->id] == 0){
+			if ((node->discovered == node->low) && (rootTreeEdges != 2)){
+				rootTreeEdges++;
+			}
+
+			iterateOverGraph(&nodesList[iter->id], nodesList, visited);
+		}
+
+		if (nodesList[iter->id].low >= node->discovered){
+			if (node->discovered != node->low){
+				if (node->articulationPoint == 0){
+				/*	printf("Parent: %d\n", node->id);
+					printf("Child: %d\n", nodesList[iter->id].id);*/
+					node->articulationPoint = 1;
+					numArticulationPoints++;
+				}
+			}
+
+			else {
+				if (rootTreeEdges == 2){
+					rootTreeEdges++;			/* Guarantees numArticulationPoints is only increased */
+					numArticulationPoints++;
+				}
+			}
+		}
+
+		iter = iter->next;
+	}
+
+	return numArticulationPoints;
+}
 
 int min(int n1, int n2){
 	if (n1 < n2)

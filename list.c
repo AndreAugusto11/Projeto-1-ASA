@@ -12,7 +12,7 @@ Node* allocList(int size){
 		nodesList[i].id = i;
 		nodesList[i].discovered = -1;
 		nodesList[i].low = -1;
-		nodesList[i].onStack = false;
+		nodesList[i].articulationPoint = 0;
 		nodesList[i].first = NULL;
 	}
 

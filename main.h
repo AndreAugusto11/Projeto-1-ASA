@@ -1,17 +1,21 @@
 #include <stdio.h>
 
-typedef enum {true, false} bool;
-
 typedef struct neighbour{
 	int id;
 	struct neighbour *next;
 } Neighbour;
 
+typedef struct linkedList{
+	Neighbour *list;
+	int size;
+	Neighbour *tail;
+} LinkedList;
+
 typedef struct node {
 	int id;
 	int low;
 	int discovered;
-	bool onStack;
+	int articulationPoint;
 	struct neighbour *first;
 } Node;
 
