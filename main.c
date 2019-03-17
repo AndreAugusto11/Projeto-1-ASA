@@ -168,8 +168,6 @@ int countArticulationPoints(Node *node, Node *nodesList, int *visitedCount){
 		if (nodesList[iter->id].low >= node->discovered){
 			if (node->discovered != node->low){
 				if (node->articulationPoint == 0){
-				/*	printf("Parent: %d\n", node->id);
-					printf("Child: %d\n", nodesList[iter->id].id);*/
 					node->articulationPoint = 1;
 					numArticulationPoints++;
 				}
