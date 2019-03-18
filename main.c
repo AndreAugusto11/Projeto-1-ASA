@@ -13,6 +13,7 @@ int findArticulationPoints(Graph *graph);
 int countArticulationPoints(Node *node, Node *nodesList, int *visited);
 int exploreArticulationPoints(Graph *graph);
 int exploreWay(Node *node, Node *nodesList, int *visitedCount);
+int noMoreNeighbours(Node *node, Node *nodesList);
 
 
 int SIZE = 25;								/* Size of output array in findScc */
@@ -23,7 +24,7 @@ int articulationPointId = 0;
 
 int main(){
 
-	int i = 1;
+	int i = 1, count = 0;
 
 	Graph *graph = (Graph *)malloc(sizeof(struct graph));
 
@@ -39,20 +40,32 @@ int main(){
 	readInput(graph);
 
 	/* outputArray to store in the first position the number of SCCs and the subgraphs' id (The highest id in each subgraph) */
-	int *outputArray = calloc(SIZE, sizeof(int));
+	int *outputArray = calloc(graph->numberRouters+1, sizeof(int));
 
 	outputArray = findSCC(graph, outputArray);
 
 	printf("%d\n", outputArray[0]);
 
-	while (outputArray[i] != 0)
-		printf("%d ", outputArray[i++]);
+	while (i <= graph->numberRouters){
+		if (outputArray[i] == 1){
+			if (count == 0){
+				printf("%d", i);
+				count++;
+			}
+			else
+				printf(" %d", i);
+		}
+		i++;
+	}
 
 	printf("\n");
 
 	printf("%d\n", findArticulationPoints(graph));
 
 	printf("%d\n", exploreArticulationPoints(graph));
+
+	printf("printing: \n");
+	printList(graph);
 
 	free(outputArray);
 
@@ -86,13 +99,9 @@ int* findSCC(Graph *graph, int *outputArray){
 
 	for (i = 1; i <= graph->numberRouters; i++){
 		if (nodesList[i].discovered == -1){
-			outputArray[j++] = TarjanAdapt(&nodesList[i], nodesList);
+			outputArray[TarjanAdapt(&nodesList[i], nodesList)] = 1;
 			numberSCCs++;
-			
-			if (j == SIZE - 1){
-				SIZE *= 2;
-				outputArray = realloc(outputArray, SIZE);
-			}
+	
 		}
 	}
 
@@ -118,16 +127,29 @@ int TarjanAdapt(Node *node, Node *nodesList){
 		if (nodesList[iter->id].discovered == -1)
 			TarjanAdapt(&nodesList[iter->id], nodesList);
 
-		node->low = min(nodesList[iter->id].low, node->low);
-		
+		if (noMoreNeighbours(node, nodesList))
+			node->low = min(nodesList[iter->id].low, node->low);
+
 		iter = iter->next;
 	}
 
 	if (node->discovered == nodesList[node->id].low)
 		return sccId;
 
-
 	return 0;
+}
+
+int noMoreNeighbours(Node *node, Node *nodesList){
+
+	Neighbour *iter = node->first;
+
+	while(iter != NULL){
+		if (nodesList[iter->id].discovered == -1)
+			return 0;
+		iter = iter->next;
+	}
+	
+	return 1;
 }
 
 int findArticulationPoints(Graph *graph){
@@ -157,7 +179,7 @@ int countArticulationPoints(Node *node, Node *nodesList, int *visitedCount){
 	Neighbour *iter = node->first;
 
 	while(iter != NULL){
-		if (visitedCount[iter->id] == 0	){
+		if (visitedCount[iter->id] == 0){
 			if ((node->discovered == node->low) && (rootTreeEdges != 2)){
 				rootTreeEdges++;
 			}
