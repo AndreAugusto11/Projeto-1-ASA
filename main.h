@@ -16,7 +16,6 @@ typedef struct node {
 	int low;
 	int discovered;
 	int articulationPoint;
-	int parentId;
 	struct neighbour *first;
 } Node;
 
