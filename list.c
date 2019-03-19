@@ -2,9 +2,10 @@
 #include <string.h>
 
 
-Node* allocList(int size){
+Node* allocList(Graph *graph){
 
 	int i;
+	int size = graph->numberRouters;
 	/* Ignoring the list's first position */
 	Node *nodesList = calloc((size + 1), sizeof(struct node));
 
