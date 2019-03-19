@@ -7,13 +7,12 @@
 void readInput(Graph *graph);
 void readInput(Graph *graph);
 int* findSCC(Graph *graph, int* outputArray);
-int TarjanAdapt(Node *node, Node *nodesList);
+int TarjanAdapt(Node *parent, Node *node, Node *nodesList);
 int min(int n1, int n2);
 int findArticulationPoints(Graph *graph);
-int countArticulationPoints(Node *node, Node *nodesList, int *visited);
+int countArticulationPoints(Node *parent, Node *node, Node *nodesList, int *visited);
 int exploreArticulationPoints(Graph *graph);
 int exploreWay(Node *node, Node *nodesList, int *visitedCount);
-int noMoreNeighbours(Node *node, Node *nodesList);
 
 
 int SIZE = 25;								/* Size of output array in findScc */
@@ -21,6 +20,7 @@ int rootTreeEdges = 0;						/* If the root has at least two tree edges then it i
 int auxCount = 0;
 int count = 0;
 int articulationPointId = 0;
+int sccId = 0;								/* Variable to help finding the subgraphsId's */
 
 int main(){
 
@@ -60,9 +60,9 @@ int main(){
 
 	printf("\n");
 
-	printf("%d\n", findArticulationPoints(graph));
+	/*printf("%d\n", findArticulationPoints(graph));
 
-	printf("%d\n", exploreArticulationPoints(graph));
+	printf("%d\n", exploreArticulationPoints(graph));*/
 
 	printf("printing: \n");
 	printList(graph);
@@ -93,15 +93,17 @@ void readInput(Graph *graph){
 int* findSCC(Graph *graph, int *outputArray){
 	
 	int i = 0, j = 1;
-	int numberSCCs = 0;
+	int numberSCCs = 0, aux = 0;
 
 	Node *nodesList = graph->nodesList;
+	Node *parent = NULL;
 
 	for (i = 1; i <= graph->numberRouters; i++){
 		if (nodesList[i].discovered == -1){
-			outputArray[TarjanAdapt(&nodesList[i], nodesList)] = 1;
+			aux = TarjanAdapt(parent, &nodesList[i], nodesList);
+			outputArray[aux] = 1;
 			numberSCCs++;
-	
+			sccId = 0;
 		}
 	}
 
@@ -111,10 +113,9 @@ int* findSCC(Graph *graph, int *outputArray){
 }
 
 
-int TarjanAdapt(Node *node, Node *nodesList){
+int TarjanAdapt(Node *parent, Node *node, Node *nodesList){
 	
 	static int time = 1;
-	static int sccId = 0;
 
 	node->discovered = time++;
 	node->low = node->discovered;
@@ -125,10 +126,25 @@ int TarjanAdapt(Node *node, Node *nodesList){
 
 	while(iter != NULL){
 		if (nodesList[iter->id].discovered == -1)
-			TarjanAdapt(&nodesList[iter->id], nodesList);
+			TarjanAdapt(node, &nodesList[iter->id], nodesList);
 
-		if (noMoreNeighbours(node, nodesList))
-			node->low = min(nodesList[iter->id].low, node->low);
+		else {
+
+			if (parent == NULL){
+				iter = iter->next;
+				continue;
+			}
+
+			if (iter->id == parent->id){
+				if (iter->next == NULL)
+					node->low = min(parent->low, node->low);			
+					
+				iter = iter->next;
+				continue;
+			}
+		}
+		
+		node->low = min(nodesList[iter->id].low, node->low);			
 
 		iter = iter->next;
 	}
@@ -139,29 +155,18 @@ int TarjanAdapt(Node *node, Node *nodesList){
 	return 0;
 }
 
-int noMoreNeighbours(Node *node, Node *nodesList){
-
-	Neighbour *iter = node->first;
-
-	while(iter != NULL){
-		if (nodesList[iter->id].discovered == -1)
-			return 0;
-		iter = iter->next;
-	}
-	
-	return 1;
-}
 
 int findArticulationPoints(Graph *graph){
 
 	Node *nodesList = graph->nodesList;
+	Node *parent = NULL;
 	int i = 0, totalArtPoints = 0, aux = 0;
 
 	int *visitedCount = calloc((graph->numberRouters + 1), sizeof(int));			/* Used when exploring the graph to count the number of articulation points */
 
 	for (i = 1; i <= graph->numberRouters; i++){
 		if (visitedCount[nodesList[i].id] == 0){
-			totalArtPoints = countArticulationPoints(&nodesList[i], nodesList, visitedCount);
+			totalArtPoints = countArticulationPoints(parent, &nodesList[i], nodesList, visitedCount);
 			rootTreeEdges = 0;
 		}
 	}
@@ -170,7 +175,7 @@ int findArticulationPoints(Graph *graph){
 	return totalArtPoints;
 }
 
-int countArticulationPoints(Node *node, Node *nodesList, int *visitedCount){
+int countArticulationPoints(Node *parent, Node *node, Node *nodesList, int *visitedCount){
 
 	static int numArticulationPoints = 0;
 	int i = 0, countAux = 0;
@@ -180,27 +185,34 @@ int countArticulationPoints(Node *node, Node *nodesList, int *visitedCount){
 
 	while(iter != NULL){
 		if (visitedCount[iter->id] == 0){
-			if ((node->discovered == node->low) && (rootTreeEdges != 2)){
+			if (node->discovered == node->low){
 				rootTreeEdges++;
+				if (rootTreeEdges == 2){
+					printf("Parent: %d\n", node->id);
+					numArticulationPoints++;
+				}
 			}
 
-			countArticulationPoints(&nodesList[iter->id], nodesList, visitedCount);
+			countArticulationPoints(node, &nodesList[iter->id], nodesList, visitedCount);
+		}
+
+		if (parent == NULL){
+			iter = iter->next;
+			continue;
+		}
+		if (iter->id == parent->id){
+			/* Don't want to explore the tree backwards */
+			iter = iter->next;
+			continue;
 		}
 
 		if (nodesList[iter->id].low >= node->discovered){
 			if (node->discovered != node->low){
 				if (node->articulationPoint == 0){
+					printf("Parent: %d\n", node->id);
+					printf("Child: %d\n", iter->id);
 					node->articulationPoint = 1;
 					numArticulationPoints++;
-				}
-			}
-
-			else {
-				if (rootTreeEdges == 2){
-					if (node->articulationPoint != 1){
-						node->articulationPoint = 1;
-						numArticulationPoints++;
-					}
 				}
 			}
 		}
