@@ -8,13 +8,17 @@ void readInput(Graph *graph);
 int* findSCC(Graph *graph, int* outputArray);
 int TarjanAdapt(Node *parent, Node *node, Node *nodesList);
 int min(int n1, int n2);
+int maxSubgraph(Graph *graph);
+int exploreGraph(Node *node, Node *nodesList, int *visited);
 
 
 int SIZE = 25;								/* Size of output array in findScc */
 int count = 0;
 int articulationPointId = 0;
 int sccId = 0;								/* Variable to help finding the subgraphsId's */
+int maxSubgraphSize = 0;
 static int numArticulationPoints = 0;
+
 
 int main(){
 
@@ -55,9 +59,7 @@ int main(){
 	printf("\n");
 
 	printf("%d\n", numArticulationPoints);
-
-	/*printf("printing: \n");
-	printList(graph);*/
+	printf("%d\n", maxSubgraph(graph));
 
 	free(outputArray);
 
@@ -137,8 +139,7 @@ int TarjanAdapt(Node *parent, Node *node, Node *nodesList){
 
 		else if (parent != NULL) {
 			if (iter->id != parent->id)
-				if (node->low > nodesList[iter->id].discovered)
-					node->low = nodesList[iter->id].discovered;
+				node->low = min(nodesList[iter->id].discovered, node->low);
 		}
 
 		iter = iter->next;
@@ -150,9 +151,50 @@ int TarjanAdapt(Node *parent, Node *node, Node *nodesList){
 	return 0;
 }
 
+
 int min(int n1, int n2){
 	if (n1 < n2)
 		return n1;
 
 	return n2;
+}
+
+
+int maxSubgraph(Graph *graph){
+
+	int i = 0, max = 0, aux = 0;
+	Node *nodesList = graph->nodesList;
+
+	int *visited = calloc(graph->numberRouters+1, sizeof(int));
+
+	for(i = 1; i < graph->numberRouters; i++){
+		if (visited[i] != 1){
+			visited[i] = 1;
+			maxSubgraphSize = 1;
+			aux = exploreGraph(&nodesList[i], nodesList, visited);
+			if (aux > max)
+				max = aux;
+		}
+	}
+
+	free(visited);
+	return max;
+}
+
+
+int exploreGraph(Node *node, Node *nodesList, int *visited){
+
+	Neighbour *iter = node->first;
+
+	while (iter != NULL){
+		if ((visited[iter->id] != 1) && (nodesList[iter->id].articulationPoint != 1)){
+			visited[iter->id] = 1;
+			maxSubgraphSize++;
+			exploreGraph(&nodesList[iter->id], nodesList, visited);
+		}
+
+		iter = iter->next;
+	}
+
+	return maxSubgraphSize;
 }
