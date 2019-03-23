@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* AUTHOR: ANDRE ALVES AUGUSTO | NUM:90704 | LEIC-T | PROJETO ASA */
+/* AUTHOR: ANDRE ALVES AUGUSTO | LEIC | PROJETO ASA */
 
 /****************************************************************
 *																*
