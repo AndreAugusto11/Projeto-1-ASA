@@ -4,9 +4,9 @@
 /* AUTHOR: ANDRE ALVES AUGUSTO | LEIC | PROJETO ASA */
 
 /****************************************************************
-*																*
-*						Defining structures						*
-*																*
+*								*
+*			Defining structures			*
+*								*
 ****************************************************************/
 
 typedef struct neighbour{
@@ -37,7 +37,7 @@ typedef struct graph {
 ****************************************************************/
 
 
-int sccId = 0;								/* Variable to help finding the subgraphsId's */
+int sccId = 0;							/* Variable to help finding the subgraphsId's */
 int maxSubgraphSize = 0;					/* Variable to help finding the size of the biggest subgraph resulting in removing all the articulation points */
 
 
