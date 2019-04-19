@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 /* AUTHOR: ANDRE ALVES AUGUSTO | LEIC | PROJETO ASA */
+/* This code has an adaptation of the Tarjan's algorithm */
 
 /****************************************************************
 *								*
